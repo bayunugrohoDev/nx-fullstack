@@ -1,0 +1,64 @@
+{
+  "name": "@nugrohocorp/api",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "serve": {
+        "continuous": true,
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "buildTarget": "@nugrohocorp/api:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "@nugrohocorp/api:build:development"
+          },
+          "production": {
+            "buildTarget": "@nugrohocorp/api:build:production"
+          }
+        }
+      },
+      "dev": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "NODE_ENV=dev node --import=tsx --watch --env-file=.env src/index.ts",
+          "cwd": "apps/api"
+        }
+      },
+      "db:generate": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "drizzle-kit generate",
+          "cwd": "apps/api"
+        }
+      },
+      "db:migrate": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "drizzle-kit migrate",
+          "cwd": "apps/api"
+        }
+      },
+      "db:studio": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "drizzle-kit studio",
+          "cwd": "apps/api"
+        }
+      },
+      "db:seed": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "node --import=tsx --env-file=.env src/db/seed/index.ts",
+          "cwd": "apps/api"
+        }
+      }
+    }
+  }
+}
