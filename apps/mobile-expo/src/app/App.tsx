@@ -1,18 +1,25 @@
+// apps/mobile-expo/src/app/App.tsx
+// import 'react-native-screens/enableScreens'; // IMPORTANT: This must be at the very top
+
+import { NavigationContainer } from "@react-navigation/native";
+import { AppNavigator } from "./navigation/AppNavigator";
+import { AuthProvider } from "./contexts/AuthContext";
 import { TamaguiProvider } from "tamagui";
-import { YStack, Typography, config } from "@glibs/ui";
+import { config } from "@glibs/ui";
 
-export const App = () => {
-
+export function App() {
+  // Anda bisa menambahkan logic loading font di sini jika ada.
+  // Untuk saat ini, kita asumsikan tidak ada loading font khusus di App.tsx.
 
   return (
     <TamaguiProvider config={config} defaultTheme="light">
-      <YStack bg={'$bg-primary'} flex={1}>
-        <YStack>
-          <Typography variant="$heading-48" color={'$fg-brand-primary'}>hello</Typography>
-        </YStack>
-      </YStack>
+      <AuthProvider>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </AuthProvider>
     </TamaguiProvider>
   );
-};
+}
 
 export default App;
