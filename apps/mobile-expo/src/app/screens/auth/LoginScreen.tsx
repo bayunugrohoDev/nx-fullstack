@@ -1,95 +1,76 @@
 // src/app/screens/auth/LoginScreen.tsx
-import React, { useState } from 'react';
 import { useNavigation } from "@react-navigation/native";
 import { Button, Input, Typography, YStack } from "@glibs/ui";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/types";
 
 // Import dari react-hook-form
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod'; // Untuk skema validasi frontend
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 // Import authService
-import { authService } from '../../services/auth.service';
+import { authService } from "../../services/auth.service";
 // import { ApiResponseError } from '../../types/auth'; // Import tipe error API
-import { useAuth } from '../../hooks/useAuth'; // Hook useAuth dari AuthContext
+import { useAuth } from "../../hooks/useAuth"; // Hook useAuth dari AuthContext
 
-// === 1. Definisikan Skema Validasi Frontend dengan Zod ===
-// Skema ini harus cocok dengan loginSchema di backend Anda
-const loginFormSchema = z.object({
-  email: z.string().email('Invalid email address').min(1, 'Email is required'),
-  password: z.string().min(1, 'Password is required'),
-});
+import { loginSchema, LoginInput } from "@glibs/types";
+import { ZodError } from "zod";
+import { AxiosError } from "axios";
+import { ApiError } from "../../utils/apiError";
 
 // Infer tipe dari skema untuk penggunaan TypeScript
-type LoginFormInputs = z.infer<typeof loginFormSchema>;
 
 export function LoginScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { login: authContextLogin } = useAuth(); // Ambil fungsi login dari AuthContext
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { login } = useAuth(); // Ambil fungsi login dari AuthContext
 
   // === 2. Inisialisasi useForm dengan zodResolver ===
   const {
     control, // Untuk mengontrol input
     handleSubmit, // Fungsi untuk menangani submit form
     formState: { errors, isSubmitting }, // State form: errors dan loading state
-    setError // Fungsi untuk mengatur error secara manual (misal: dari API)
-  } = useForm<LoginFormInputs>({
-    resolver: zodResolver(loginFormSchema), // Menggunakan Zod untuk validasi
+    setError, // Fungsi untuk mengatur error secara manual (misal: dari API)
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema), // Menggunakan Zod untuk validasi
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
-  const onSubmit = async (data: LoginFormInputs) => {
+  const onSubmit = async (data: LoginInput) => {
     try {
+      console.log("Form submitted:", data);
       // Panggil authService.login yang akan berkomunikasi dengan backend
       const authResponse = await authService.login(data);
+  console.log('authResponse :', authResponse);
+      if (!authResponse.success || !authResponse.data) {
+        throw new Error(authResponse.message);
+      }
 
       // Simpan token dan info user ke AuthContext (dan AsyncStorage)
-      // Asumsi fungsi login di useAuth Anda menerima token dan user data
-      await authContextLogin(authResponse.token, authResponse.user);
-
+      await login(authResponse.data.token, authResponse.data.user);
+      console.log('Login successful, navigating to Home');
       // Navigasi setelah sukses login
-      navigation.navigate("Main"); // Navigasi ke MainStack setelah login sukses
+      navigation.navigate("Home"); // Navigasi ke MainStack setelah login sukses
 
-    } catch (err: any) {
-      console.error('Login API Error:', err);
-      // Tangani error dari API
-      if (err && typeof err === 'object' && 'message' in err) {
-          const apiError = err as ApiResponseError;
-          // Set error form berdasarkan pesan dari API
-          if (apiError.errors && apiError.errors.length > 0) {
-              // Jika ada Zod errors dari backend
-              apiError.errors.forEach((e: any) => {
-                  if (e.path && e.path[0]) {
-                      setError(e.path[0] as keyof LoginFormInputs, {
-                          type: 'server',
-                          message: e.message,
-                      });
-                  }
-              });
-          } else {
-              // Jika error umum dari API
-              setError('root.serverError', {
-                  type: 'server',
-                  message: apiError.message,
-              });
-          }
-      } else {
-          // Tangani error yang tidak terduga
-          setError('root.serverError', {
-              type: 'server',
-              message: 'An unexpected error occurred. Please try again.',
-          });
-      }
+    } catch (err: ZodError | AxiosError | Error | ApiError ) {
+      console.error("Login API Error (Catch Block):", err);
+      setError("root.serverError", {
+        type: "server",
+        message: err.message || "An unexpected error occurred. Please try again.",
+      });
     }
   };
 
   return (
-    <YStack flex={1} jc={"space-between"} p={"$spacing-md"} backgroundColor={'#6965F2'}>
+    <YStack
+      flex={1}
+      jc={"space-between"}
+      p={"$spacing-md"}
+      backgroundColor={"#6965F2"}
+    >
       <YStack ai={"center"} gap={"$spacing-lg"}>
         <Typography variant="$body-18">Sign in</Typography>
         <Typography>Continue your vocabulary journey</Typography>
@@ -152,9 +133,7 @@ export function LoginScreen() {
 
       {/* === 5. Tombol Login === */}
       <Button onPress={handleSubmit(onSubmit)} disabled={isSubmitting}>
-        <Typography>
-          {isSubmitting ? 'Logging In...' : 'Login'}
-        </Typography>
+        <Typography>{isSubmitting ? "Logging In..." : "Login"}</Typography>
       </Button>
     </YStack>
   );

@@ -1,4 +1,4 @@
-// src/validation/userValidation.ts
+
 import { z } from 'zod';
 
 export const registerSchema = z.object({
@@ -24,7 +24,25 @@ export const updateUserSchema = z.object({
   path: ["body"], // Zod error path
 });
 
-// Export inferred types for convenience
+
+const userSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  email: z.string().email(),
+  currentLanguageId: z.string().uuid().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+
+// Type for the user object that is returned to the client
+export type User = z.infer<typeof userSchema>;
+
+// Type for the successful login response
+export type LoginResponse = {
+  token: string;
+  user: User;
+};

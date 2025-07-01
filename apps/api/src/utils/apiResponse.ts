@@ -29,7 +29,7 @@ export function sendApiResponse<T>(
   success: boolean,
   message: string,
   data: T | null = null,
-  errors: any[] | null = null
+  errors: T | null = null
 ): Response {
   const response: ApiResponse<T> = {
     success,
@@ -37,7 +37,7 @@ export function sendApiResponse<T>(
     data,
   };
 
-  if (errors !== null && errors.length > 0) {
+  if (errors !== null) {
     response.errors = errors;
   }
 

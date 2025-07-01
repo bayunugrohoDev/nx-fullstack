@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import _ from 'lodash';
 import { z, ZodError } from 'zod';
+import { sendApiResponse } from '../utils/apiResponse';
 
 // Ubah tipe schema menjadi z.ZodSchema
 export function validateData(schema: z.ZodSchema<any>) { // <--- KOREKSI PENTING DI SINI
@@ -16,10 +17,12 @@ export function validateData(schema: z.ZodSchema<any>) { // <--- KOREKSI PENTING
           field: issue.path.join('.'),
           message: issue.message,
         }));
-        res.status(400).json({
-          message: 'Validation error',
-          errors: errorMessages
-        });
+          sendApiResponse(res, 400, false, 'Validation error', null, error.errors);
+        
+        // res.status(400).json({
+        //   message: 'Validation error',
+        //   errors: errorMessages
+        // });
         return;
       } else {
         console.error('Unexpected error in validation middleware:', error);

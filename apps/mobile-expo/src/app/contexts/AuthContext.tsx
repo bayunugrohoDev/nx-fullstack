@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '../types/user'; // Assume User type exists
+import { LoginResponse, User } from '@glibs/types'; // Assume User type exists
 import { Text, View, ActivityIndicator } from 'react-native'; // Using basic RN components
 
 interface AuthContextType {

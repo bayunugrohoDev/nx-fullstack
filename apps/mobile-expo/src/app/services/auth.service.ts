@@ -1,15 +1,17 @@
 // src/app/services/auth.service.ts
 import api from './api';
 import { LoginPayload, RegisterPayload, AuthResponse } from '../types/auth';
+import { LoginResponse, ApiResponse } from '@glibs/types';
 
 export const authService = {
-  login: async (payload: LoginPayload): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/login', payload);
-    return response.data; // Axios membungkus respons di .data
+  login: async (payload: LoginPayload): Promise<ApiResponse<LoginResponse>> => {
+    const response = await api.post<ApiResponse<LoginResponse>>('/auth/login', payload);
+    console.log('response :', response);
+    return response.data;
   },
 
-  register: async (payload: RegisterPayload): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/register', payload);
+  register: async (payload: RegisterPayload): Promise<ApiResponse<AuthResponse>> => {
+    const response = await api.post<ApiResponse<AuthResponse>>('/auth/register', payload);
     return response.data;
   },
 

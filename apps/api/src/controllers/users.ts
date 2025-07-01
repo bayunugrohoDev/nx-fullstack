@@ -5,9 +5,11 @@ import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/jwt';
-import { registerSchema, loginSchema, updateUserSchema } from '../validation/userValidation';
+import { registerSchema, loginSchema, updateUserSchema } from '@glibs/types';
 import { ZodError } from 'zod';
 import { handleServerError, sendApiResponse } from '../utils/apiResponse';
+import { LoginResponse } from '@glibs/types';
+
 
 // --- User Registration ---
 export const registerUser = async (req: Request, res: Response) => {
@@ -95,17 +97,12 @@ export const loginUser = async (req: Request, res: Response) => {
     });
 
     // === PENTING: Hapus 'return' di depan res.status() ===
-    sendApiResponse(res, 200, true, 'Login successful!', {
-      token,
-      user: userWithoutPassword,
-    })
-    return
-    res.status(200).json({
-      message: 'Login successful!',
+    sendApiResponse<LoginResponse>(res, 200, true, 'Login successful!', {
       token,
       user: userWithoutPassword,
     });
-    return; // Cukup 'return;'
+    return
+
 
   } catch (error) {
     if (error instanceof ZodError) {

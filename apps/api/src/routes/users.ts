@@ -9,7 +9,7 @@ import {
 } from '../controllers/users';
 import { validateData } from '../middlewares/validationMiddleware'; // Middleware for Zod validation
 import { verifyToken } from '../middlewares/authMiddleware';     // Middleware for JWT authentication
-import { registerSchema, loginSchema, updateUserSchema } from '../validation/userValidation'; // Zod schemas
+import { registerSchema, loginSchema, updateUserSchema } from '@glibs/types'; // Zod schemas
 
 const router = Router();
 
